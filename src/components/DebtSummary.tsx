@@ -58,7 +58,10 @@ export default function DebtSummary() {
   const [trips, setTrips] = useState<Trip[]>([])
   const [expensesByTrip, setExpensesByTrip] = useState<Record<string, Expense[]>>({})
   const [memberName, setMemberName] = useState("")
+  const [clearedDebts, setClearedDebts] = useState<Transfer[]>([])
+  const [showCleared, setShowCleared] = useState(true)
 
+  // 🔹 Load trips and expenses
   useEffect(() => {
     const allTrips = getTrips()
     setTrips(allTrips)
@@ -69,7 +72,18 @@ export default function DebtSummary() {
     setExpensesByTrip(allExpenses)
   }, [])
 
-  // Compute all transfers across all trips
+  // 🔹 Load cleared debts from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem("clearedDebts")
+    if (stored) setClearedDebts(JSON.parse(stored))
+  }, [])
+
+  // 🔹 Save cleared debts to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem("clearedDebts", JSON.stringify(clearedDebts))
+  }, [clearedDebts])
+
+  // 🔹 Compute all transfers across trips
   const allTransfers = useMemo(() => {
     const transfers: Transfer[] = []
     for (const trip of trips) {
@@ -102,21 +116,40 @@ export default function DebtSummary() {
     return transfers
   }, [trips, expensesByTrip])
 
-  const filteredTransfers = memberName
-  ? allTransfers.filter(
-      (t) =>
-        t.from.toLowerCase().includes(memberName.toLowerCase().trim()) ||
-        t.to.toLowerCase().includes(memberName.toLowerCase().trim())
+  // 🔹 Identify cleared vs active debts
+  const isCleared = (t: Transfer) =>
+    clearedDebts.some(
+      (c) =>
+        c.from === t.from &&
+        c.to === t.to &&
+        Math.abs(c.amount - t.amount) < 0.01 &&
+        c.tripName === t.tripName
     )
-  : allTransfers
 
+  const activeTransfers = allTransfers.filter((t) => !isCleared(t))
+  const clearedTransfers = allTransfers.filter(isCleared)
+
+  // 🔹 Handle clearing a debt
+  const handleClearDebt = (t: Transfer) => {
+    setClearedDebts((prev) => [...prev, t])
+  }
+
+  // 🔹 Filter by member name
+  const filteredTransfers = memberName
+    ? activeTransfers.filter(
+        (t) =>
+          t.from.toLowerCase().includes(memberName.toLowerCase().trim()) ||
+          t.to.toLowerCase().includes(memberName.toLowerCase().trim())
+      )
+    : activeTransfers
 
   return (
-    <div style={{ padding: "20px", maxWidth: "600px", margin: "0 auto" }}>
-      <h2>Debt Summary Across Trips</h2>
-      <br></br>
-      <div style={{ marginBottom: "1rem" }}>
-        <label>Enter member name: </label>
+    <div style={{ padding: "20px", maxWidth: "700px", margin: "0 auto" }}>
+      <h2 className="text-2xl font-semibold mb-4 text-primary">💸 Debt Summary Across Trips</h2>
+
+      {/* Member filter */}
+      <div style={{ marginBottom: "1.5rem" }}>
+        <label style={{ marginRight: "8px" }}>Search Member:</label>
         <input
           type="text"
           value={memberName}
@@ -124,41 +157,108 @@ export default function DebtSummary() {
           placeholder="e.g., Diya"
           style={{
             padding: "6px 10px",
-            borderRadius: "4px",
+            borderRadius: "6px",
             border: "1px solid #ccc",
-            marginLeft: "8px",
+            minWidth: "200px",
           }}
         />
       </div>
 
+      {/* Active Debts */}
       {!filteredTransfers.length ? (
-        <p>{memberName ? `All settled up for ${memberName}!` : "All settled up!"}</p>
+        <p style={{ color: "#ccc" }}>
+          {memberName ? `All settled up for ${memberName}!` : "All settled up! 🎉"}
+        </p>
       ) : (
         <ul style={{ listStyle: "none", padding: 0 }}>
           {filteredTransfers.map((t, idx) => (
             <li
               key={idx}
               style={{
-                border: "3px solid #ccc",
-                borderRadius: "6px",
-                padding: "10px",
+                border: "2px solid #444",
+                borderRadius: "10px",
+                padding: "12px 16px",
                 marginBottom: "10px",
-                background: "#f9f9f9",
-                color: "#333",
-                boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-
+                background: "#121826",
+                color: "#fff",
+                boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
               }}
             >
               <div>
-                <strong>{t.from}</strong> owes <strong>{t.to}</strong> –{" "}
+                <strong>{t.from}</strong> owes <strong>{t.to}</strong> —{" "}
                 {t.amount.toFixed(2)} ({t.tripName})
+                <div style={{ fontSize: "0.9em", color: "#bbb" }}>
+                  Purpose: {t.purpose}
+                </div>
               </div>
-              <div style={{ fontSize: "0.9em", color: "#666" }}>
-                Purpose: {t.purpose}
-              </div>
+              <button
+                onClick={() => handleClearDebt(t)}
+                style={{
+                  background: "#4caf50",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "8px",
+                  padding: "6px 12px",
+                  cursor: "pointer",
+                  fontWeight: "bold",
+                }}
+              >
+                Clear
+              </button>
             </li>
           ))}
         </ul>
+      )}
+
+      {/* Cleared Debts */}
+      {showCleared && clearedTransfers.length > 0 && (
+        <div style={{ marginTop: "2rem" }}>
+          <h3
+            style={{
+              color: "#8bc34a",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              fontWeight: "bold",
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={showCleared}
+              onChange={(e) => setShowCleared(e.target.checked)}
+              style={{ accentColor: "#8bc34a" }}
+            />
+            Cleared Debts
+          </h3>
+          <ul style={{ listStyle: "none", padding: 0, marginTop: "1rem" }}>
+            {clearedTransfers.map((t, idx) => (
+              <li
+                key={idx}
+                style={{
+                  border: "1px solid #66bb6a",
+                  borderRadius: "10px",
+                  padding: "12px 16px",
+                  marginBottom: "10px",
+                  background: "#e6f4ea",
+                  color: "#2e7d32",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  fontWeight: 500,
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+                }}
+              >
+                <span>
+                  {t.from} → {t.to} ({t.tripName}) — {t.amount.toFixed(2)}
+                </span>
+                <span style={{ fontSize: "1.2em" }}>✅</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   )
