@@ -129,7 +129,7 @@ export default function ExpenseForm({ trip, onCreated, prefillDescription, prefi
             onChange={(e) => setShowDishMode(e.target.value === "dish")}
           >
             <option value="normal">Normal</option>
-            <option value="dish">Per-Dish Mode</option>
+            <option value="dish">Per-Item Mode</option>
           </select>
         </label>
       </div>
