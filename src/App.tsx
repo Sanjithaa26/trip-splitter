@@ -11,6 +11,7 @@ import TripList from "./components/TripList";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import DebtSummary from "./components/DebtSummary"; 
 import MapPage from "./pages/MapPage";
+import ItineraryPage from "./pages/ItineraryPage";
 
 export default function App() {
   return (
@@ -42,6 +43,7 @@ export default function App() {
           <Route path="/analytics" element={<AnalyticsPage />} />
           <Route path="/debts" element={<DebtSummary />} />
           <Route path="/map" element={<MapPage />} />
+          <Route path="/trip/:name/itinerary" element={<ItineraryPage />} />
           {/* Remove the empty trip render */}
         </Routes>
       </main>

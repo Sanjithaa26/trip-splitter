@@ -14,7 +14,7 @@ const features = [
   { title: "Analytics", desc: "See category-wise spending", to: "/analytics", anchor: false, gradient: "grad-3" },
   { title: "Map", desc: "See expenses on a map", to: "/map", anchor: false, gradient: "grad-4" },
   { title: "Chat", desc: "Group chat/comments", to: "/chat", anchor: false, gradient: "grad-5" },
-  { title: "Itinerary", desc: "Link expenses to itinerary", to: "/itinerary", anchor: false, gradient: "grad-1" },
+  { title: "Itinerary", desc: "Link expenses to itinerary", to: "/trip/:name/itinerary", anchor: false, gradient: "grad-1" },
 ];
 
 export default function Home() {
@@ -40,8 +40,6 @@ export default function Home() {
           )
         )}
       </section>
-
-
 
       <div className="note">
         Explore more features by creating a trip and opening it from the Trips list. Debt Summary, Analytics, Map, Chat,

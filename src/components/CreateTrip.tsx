@@ -22,7 +22,7 @@ export default function CreateTrip() {
     const trip = addTrip({ name, currency, members: memberList })
     setName("")
     setMembers("")
-    navigate(`/trip/${trip.id}`)
+    navigate(`/trips`)
   }
 
   return (
