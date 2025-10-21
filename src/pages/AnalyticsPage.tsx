@@ -1,7 +1,8 @@
 "use client"
-import Analytics from "../components/AnalyticsDashboard";
+import Analytics from "../components/TripWiseAnalytics";
 
 export default function AnalyticsPage() {
     const trip = {} as any;
-    return <Analytics trip={trip} />
+    const AnalyticsComponent: any = Analytics;
+    return <AnalyticsComponent trip={trip} />
 }

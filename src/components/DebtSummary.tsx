@@ -1,15 +1,21 @@
-"use client"
+"use client";
 
-import { useEffect, useMemo, useState } from "react"
-import { type Expense, type Trip, useFirestore } from "../hooks/useFirestore"
+import { useEffect, useState, useMemo } from "react";
+import { type Expense, type Trip, useFirestore } from "../hooks/useFirestore";
 
 type Transfer = {
-  from: string
-  to: string
-  amount: number
-  purpose?: string
-  tripName?: string
-}
+  from: string;
+  to: string;
+  amount: number;
+  purpose?: string;
+  tripName?: string;
+};
+
+type ClearedDebt = {
+  from: string;
+  to: string;
+  tripName: string;
+};
 
 function simplifyBalances(
   balances: Record<string, number>,
@@ -18,136 +24,154 @@ function simplifyBalances(
 ): Transfer[] {
   const creditors = Object.entries(balances)
     .filter(([, v]) => v > 0)
-    .sort((a, b) => b[1] - a[1])
+    .sort((a, b) => b[1] - a[1]);
   const debtors = Object.entries(balances)
     .filter(([, v]) => v < 0)
-    .sort((a, b) => a[1] - b[1])
+    .sort((a, b) => a[1] - b[1]);
 
-  const transfers: Transfer[] = []
+  const transfers: Transfer[] = [];
   let i = 0,
-    j = 0
+    j = 0;
+
   while (i < creditors.length && j < debtors.length) {
-    const [cName, cAmt] = creditors[i]
-    const [dName, dAmt] = debtors[j]
-    const amount = Math.min(cAmt, -dAmt)
+    const [cName, cAmt] = creditors[i];
+    const [dName, dAmt] = debtors[j];
+    const amount = Math.min(cAmt, -dAmt);
 
     if (amount > 0.0001) {
       const relatedExpense = expenses.find(
         (e) =>
           (e.payer === cName && (e.shares?.[dName] || e.split === "equal")) ||
           (e.payer === dName && (e.shares?.[cName] || e.split === "equal"))
-      )
+      );
+
       transfers.push({
         from: dName,
         to: cName,
         amount,
         purpose: relatedExpense?.description || "Shared expense",
         tripName: trip.name,
-      })
-      creditors[i][1] -= amount
-      debtors[j][1] += amount
+      });
+
+      creditors[i][1] -= amount;
+      debtors[j][1] += amount;
     }
-    if (creditors[i][1] <= 0.0001) i++
-    if (debtors[j][1] >= -0.0001) j++
+
+    if (creditors[i][1] <= 0.0001) i++;
+    if (debtors[j][1] >= -0.0001) j++;
   }
-  return transfers
+
+  return transfers;
 }
 
 export default function DebtSummary() {
-  const { getTrips, getExpenses } = useFirestore()
-  const [trips, setTrips] = useState<Trip[]>([])
-  const [expensesByTrip, setExpensesByTrip] = useState<Record<string, Expense[]>>({})
-  const [memberName, setMemberName] = useState("")
-  const [clearedDebts, setClearedDebts] = useState<Transfer[]>([])
-  const [showCleared, setShowCleared] = useState(true)
+  const { getTrips, getExpenses, subscribeTrips, subscribeExpenses } = useFirestore();
 
-  // 🔹 Load trips and expenses
+  const [trips, setTrips] = useState<Trip[]>([]);
+  const [expensesByTrip, setExpensesByTrip] = useState<Record<string, Expense[]>>({});
+  const [memberName, setMemberName] = useState("");
+  const [clearedDebts, setClearedDebts] = useState<ClearedDebt[]>([]);
+  const [showCleared, setShowCleared] = useState(true);
+
+  // Load cleared debts from localStorage once
   useEffect(() => {
-    const allTrips = getTrips()
-    setTrips(allTrips)
-    const allExpenses: Record<string, Expense[]> = {}
-    for (const trip of allTrips) {
-      allExpenses[trip.id] = getExpenses(trip.id)
-    }
-    setExpensesByTrip(allExpenses)
-  }, [])
+    const stored = localStorage.getItem("clearedDebts");
+    if (stored) setClearedDebts(JSON.parse(stored));
+  }, []);
 
-  // 🔹 Load cleared debts from localStorage
+  // Persist cleared debts in localStorage
   useEffect(() => {
-    const stored = localStorage.getItem("clearedDebts")
-    if (stored) setClearedDebts(JSON.parse(stored))
-  }, [])
+    localStorage.setItem("clearedDebts", JSON.stringify(clearedDebts));
+  }, [clearedDebts]);
 
-  // 🔹 Save cleared debts to localStorage whenever they change
+  // Subscribe to trips
   useEffect(() => {
-    localStorage.setItem("clearedDebts", JSON.stringify(clearedDebts))
-  }, [clearedDebts])
+    const loadAllTrips = () => {
+      const allTrips = getTrips() || [];
+      setTrips(allTrips);
 
-  // 🔹 Compute all transfers across trips
+      // Load expenses for each trip
+      const allExpenses: Record<string, Expense[]> = {};
+      for (const trip of allTrips) {
+        allExpenses[trip.id] = getExpenses(trip.id) || [];
+      }
+      setExpensesByTrip(allExpenses);
+    };
+
+    loadAllTrips();
+    const unsubTrips = subscribeTrips(loadAllTrips);
+
+    // Subscribe to each trip's expenses
+    const unsubExpenses = trips.map((t) => subscribeExpenses(t.id, loadAllTrips));
+
+    return () => {
+      unsubTrips();
+      unsubExpenses.forEach((u) => u());
+    };
+  }, [getTrips, getExpenses, subscribeTrips, subscribeExpenses, trips.length]);
+
+  // Compute transfers
   const allTransfers = useMemo(() => {
-    const transfers: Transfer[] = []
+    const transfers: Transfer[] = [];
     for (const trip of trips) {
-      const expenses = expensesByTrip[trip.id] || []
-      if (!trip.members?.length) continue
+      const expenses = expensesByTrip[trip.id] || [];
+      if (!trip.members?.length) continue;
 
-      const balances: Record<string, number> = Object.fromEntries(trip.members.map((m) => [m, 0]))
+      const balances: Record<string, number> = Object.fromEntries(trip.members.map((m) => [m, 0]));
 
       for (const e of expenses) {
         if (e.split === "equal") {
-          const share = e.amount / trip.members.length
-          for (const m of trip.members) balances[m] -= share
-          balances[e.payer] += e.amount
+          const share = e.amount / trip.members.length;
+          for (const m of trip.members) balances[m] -= share;
+          balances[e.payer] += e.amount;
         } else {
-          const totalShares = Object.values(e.shares || {}).reduce((a, b) => a + b, 0) || e.amount
+          const totalShares = Object.values(e.shares || {}).reduce((a, b) => a + b, 0) || e.amount;
           for (const m of trip.members) {
-            const s = e.shares?.[m] ?? 0
-            balances[m] -= s
+            const s = e.shares?.[m] ?? 0;
+            balances[m] -= s;
           }
-          balances[e.payer] += e.amount
-          const remainder = e.amount - totalShares
+          balances[e.payer] += e.amount;
+          const remainder = e.amount - totalShares;
           if (Math.abs(remainder) > 0.001) {
-            const adj = remainder / trip.members.length
-            for (const m of trip.members) balances[m] -= adj
+            const adj = remainder / trip.members.length;
+            for (const m of trip.members) balances[m] -= adj;
           }
         }
       }
-      transfers.push(...simplifyBalances(balances, expenses, trip))
+
+      transfers.push(...simplifyBalances(balances, expenses, trip));
     }
-    return transfers
-  }, [trips, expensesByTrip])
+    return transfers;
+  }, [trips, expensesByTrip]);
 
-  // 🔹 Identify cleared vs active debts
   const isCleared = (t: Transfer) =>
-    clearedDebts.some(
-      (c) =>
-        c.from === t.from &&
-        c.to === t.to &&
-        Math.abs(c.amount - t.amount) < 0.01 &&
-        c.tripName === t.tripName
-    )
+    clearedDebts.some((c) => c.from === t.from && c.to === t.to && c.tripName === t.tripName);
 
-  const activeTransfers = allTransfers.filter((t) => !isCleared(t))
-  const clearedTransfers = allTransfers.filter(isCleared)
+  const activeTransfers = allTransfers.filter((t) => !isCleared(t));
+  const clearedTransfers = allTransfers.filter(isCleared);
 
-  // 🔹 Handle clearing a debt
   const handleClearDebt = (t: Transfer) => {
-    setClearedDebts((prev) => [...prev, t])
-  }
+    const debtKey = { from: t.from, to: t.to, tripName: t.tripName! };
+    setClearedDebts((prev) => {
+      if (prev.some((c) => c.from === t.from && c.to === t.to && c.tripName === t.tripName))
+        return prev;
+      return [...prev, debtKey];
+    });
+  };
 
-  // 🔹 Filter by member name
   const filteredTransfers = memberName
     ? activeTransfers.filter(
         (t) =>
           t.from.toLowerCase().includes(memberName.toLowerCase().trim()) ||
           t.to.toLowerCase().includes(memberName.toLowerCase().trim())
       )
-    : activeTransfers
+    : activeTransfers;
 
   return (
     <div style={{ padding: "20px", maxWidth: "700px", margin: "0 auto" }}>
       <h2 className="text-2xl font-semibold mb-4 text-primary">💸 Debt Summary Across Trips</h2>
 
-      {/* Member filter */}
+      {/* Search Bar */}
       <div style={{ marginBottom: "1.5rem" }}>
         <label style={{ marginRight: "8px" }}>Search Member:</label>
         <input
@@ -164,7 +188,6 @@ export default function DebtSummary() {
         />
       </div>
 
-      {/* Active Debts */}
       {!filteredTransfers.length ? (
         <p style={{ color: "#ccc" }}>
           {memberName ? `All settled up for ${memberName}!` : "All settled up! 🎉"}
@@ -181,18 +204,15 @@ export default function DebtSummary() {
                 marginBottom: "10px",
                 background: "#121826",
                 color: "#fff",
-                boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
               }}
             >
               <div>
-                <strong>{t.from}</strong> owes <strong>{t.to}</strong> —{" "}
-                {t.amount.toFixed(2)} ({t.tripName})
-                <div style={{ fontSize: "0.9em", color: "#bbb" }}>
-                  Purpose: {t.purpose}
-                </div>
+                <strong>{t.from}</strong> owes <strong>{t.to}</strong> — {t.amount.toFixed(2)} (
+                {t.tripName})
+                <div style={{ fontSize: "0.9em", color: "#bbb" }}>Purpose: {t.purpose}</div>
               </div>
               <button
                 onClick={() => handleClearDebt(t)}
@@ -213,16 +233,15 @@ export default function DebtSummary() {
         </ul>
       )}
 
-      {/* Cleared Debts */}
       {showCleared && clearedTransfers.length > 0 && (
         <div style={{ marginTop: "2rem" }}>
           <h3
             style={{
               color: "#8bc34a",
+              fontWeight: "bold",
               display: "flex",
               alignItems: "center",
               gap: "8px",
-              fontWeight: "bold",
             }}
           >
             <input
@@ -248,7 +267,6 @@ export default function DebtSummary() {
                   justifyContent: "space-between",
                   alignItems: "center",
                   fontWeight: 500,
-                  boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
                 }}
               >
                 <span>
@@ -261,5 +279,5 @@ export default function DebtSummary() {
         </div>
       )}
     </div>
-  )
+  );
 }

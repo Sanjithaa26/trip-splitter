@@ -10,6 +10,7 @@ import ChatPage from "./pages/ChatPage";
 import TripList from "./components/TripList";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import DebtSummary from "./components/DebtSummary"; 
+import MapPage from "./pages/MapPage";
 
 export default function App() {
   return (
@@ -20,15 +21,9 @@ export default function App() {
             <span className="brand-name"><h1>Split Trip</h1></span>
           </Link>
           <nav className="nav" aria-label="Primary Navigation">
-            <Link to="/" className="nav-link">
-              Home
-            </Link>
-            <Link to="/add-expense" className="nav-link">
-              Add Expense
-            </Link>
-            <Link to="/create-trip" className="nav-link">
-              Create Trip
-            </Link>
+            <Link to="/" className="nav-link">Home</Link>
+            <Link to="/add-expense" className="nav-link">Add Expense</Link>
+            <Link to="/create-trip" className="nav-link">Create Trip</Link>
           </nav>
           <OfflineIndicator />
         </div>
@@ -40,13 +35,14 @@ export default function App() {
           <Route path="/trips" element={<TripList />} />
           <Route path="/trip/:name" element={<TripDetails />} />
           <Route path="/add-expense" element={<AddExpense />} />
-          <Route path="/create-trip" element={<CreateTripPage />} /> {/* ✅ new route */}
+          <Route path="/create-trip" element={<CreateTripPage />} />
           <Route path="/currency" element={<CurrencyPage />} />
           <Route path="/ocr" element={<ReceiptPage />} />
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
-          <Route path="/debts" element={<DebtSummary trip={{} as any} />} />
-
+          <Route path="/debts" element={<DebtSummary />} />
+          <Route path="/map" element={<MapPage />} />
+          {/* Remove the empty trip render */}
         </Routes>
       </main>
 
