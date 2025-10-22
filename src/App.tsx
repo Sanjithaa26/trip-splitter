@@ -51,9 +51,6 @@ export default function App() {
       </main>
 
       <footer className="app-footer" role="contentinfo">
-        <div className="container footer-inner">
-          <p>Built with love for simpler group trips.</p>
-        </div>
       </footer>
     </div>
   );
