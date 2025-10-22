@@ -10,7 +10,7 @@ const features = [
   { title: "Add Expense", desc: "Quickly add an expense", to: "/add-expense", anchor: false, gradient: "grad-3" },
   { title: "Debt Summary", desc: "Auto-simplify who owes whom", to: "/debts", anchor: false, gradient: "grad-4" },
   { title: "Currency Converter", desc: "Live exchange rates", to: "/currency", anchor: false, gradient: "grad-5" },
-  { title: "Receipt OCR", desc: "Upload receipts and extract text", to: "/ocr", anchor: false, gradient: "grad-2" },
+  { title: "Receipt OCR", desc: "Upload receipts and extract text", to: "/trip/:name/ocr", anchor: false, gradient: "grad-2" },
   { title: "Analytics", desc: "See category-wise spending", to: "/analytics", anchor: false, gradient: "grad-3" },
   { title: "Map", desc: "See expenses on a map", to: "/map", anchor: false, gradient: "grad-4" },
   { title: "Chat", desc: "Group chat/comments", to: "/trip/:name/chat", anchor: false, gradient: "grad-5" },

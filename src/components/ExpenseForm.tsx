@@ -169,7 +169,7 @@ export default function ExpenseForm({ trip, onCreated, prefillDescription, prefi
                     <input
                       className="input"
                       type="number"
-                      step="0.1"
+                      step="1"
                       value={dish.memberPortions[m] ?? 0}
                       onChange={(e) => updateMemberPortion(i, m, Number(e.target.value))}
                     />

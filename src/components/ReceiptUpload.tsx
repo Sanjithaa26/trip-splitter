@@ -125,7 +125,7 @@ export default function ReceiptUpload({ onExtracted }: Props) {
 
   return (
     <div className="card">
-      <h3>📸 Receipt OCR</h3>
+      <h3>Receipt OCR</h3>
       <input
         className="input"
         type="file"

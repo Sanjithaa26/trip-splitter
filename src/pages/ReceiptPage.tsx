@@ -1,6 +1,6 @@
 "use client";
 
-import ReceiptUpload from "../components/ReceiptUpload";
+import ReceiptUpload from "../components/ReceiptFull";
 
 export default function ReceiptPage() {
   return <ReceiptUpload />;

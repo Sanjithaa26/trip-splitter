@@ -169,7 +169,7 @@ export default function DebtSummary() {
 
   return (
     <div style={{ padding: "20px", maxWidth: "700px", margin: "0 auto" }}>
-      <h2 className="text-2xl font-semibold mb-4 text-primary">💸 Debt Summary Across Trips</h2>
+      <h2 className="text-2xl font-semibold mb-4 text-primary">Debt Summary Across Trips</h2>
 
       {/* Search Bar */}
       <div style={{ marginBottom: "1.5rem" }}>
