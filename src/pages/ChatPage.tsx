@@ -1,8 +1,7 @@
 "use client";
 
-import ChatSection from "../components/ChatSection";
+import ChatSection from "../components/ChatTrip";
 
 export default function ChatPage() {
-  const trip = {} as any;
-  return <ChatSection trip={trip} />;
+  return <ChatSection />;
 }

@@ -1,5 +1,4 @@
 "use client";
-
 import { type FormEvent, useEffect, useRef, useState } from "react";
 import { type Message, type Trip, useFirestore } from "../hooks/useFirestore";
 
@@ -15,17 +14,17 @@ export default function ChatSection({ trip }: Props) {
   // Subscribe to messages
   useEffect(() => {
     const refresh = () => {
-      const msgs = getMessages(trip.name) || [];
+      const msgs = getMessages(trip.id) || [];
       setMessages(msgs);
     };
 
     refresh(); // initial load
-    const unsubscribe = subscribeMessages(trip.name, refresh);
+    const unsubscribe = subscribeMessages(trip.id, refresh);
 
     return () => {
       if (typeof unsubscribe === "function") unsubscribe();
     };
-  }, [trip.name, getMessages, subscribeMessages]);
+  }, [trip.id, getMessages, subscribeMessages]);
 
   // Scroll to bottom on new messages
   useEffect(() => {
@@ -36,7 +35,7 @@ export default function ChatSection({ trip }: Props) {
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!text.trim()) return;
-    addMessage(trip.name, { author, text });
+    addMessage(trip.id, { author, text });
     setText("");
   };
 

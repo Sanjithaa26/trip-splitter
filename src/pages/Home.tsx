@@ -13,7 +13,7 @@ const features = [
   { title: "Receipt OCR", desc: "Upload receipts and extract text", to: "/ocr", anchor: false, gradient: "grad-2" },
   { title: "Analytics", desc: "See category-wise spending", to: "/analytics", anchor: false, gradient: "grad-3" },
   { title: "Map", desc: "See expenses on a map", to: "/map", anchor: false, gradient: "grad-4" },
-  { title: "Chat", desc: "Group chat/comments", to: "/chat", anchor: false, gradient: "grad-5" },
+  { title: "Chat", desc: "Group chat/comments", to: "/trip/:name/chat", anchor: false, gradient: "grad-5" },
   { title: "Itinerary", desc: "Link expenses to itinerary", to: "/trip/:name/itinerary", anchor: false, gradient: "grad-1" },
 ];
 

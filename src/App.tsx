@@ -44,6 +44,7 @@ export default function App() {
           <Route path="/debts" element={<DebtSummary />} />
           <Route path="/map" element={<MapPage />} />
           <Route path="/trip/:name/itinerary" element={<ItineraryPage />} />
+          <Route path="/trip/:name/chat" element={<ChatPage />} />
           {/* Remove the empty trip render */}
         </Routes>
       </main>
