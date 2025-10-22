@@ -90,7 +90,15 @@ export default function TripDetails() {
           <ReceiptUpload
             onExtracted={(text, amount) => {
               setOcrText(text);
-              setOcrAmount(amount);
+              // amount can be a number or an array of items returned by the OCR parser.
+              // If it's an array, try to extract a numeric value from the first item.
+              if (Array.isArray(amount)) {
+                const first = amount[0];
+                const value = first && typeof (first as any).amount === "number" ? (first as any).amount : undefined;
+                setOcrAmount(value);
+              } else {
+                setOcrAmount(amount);
+              }
             }}
           />
           <ExpenseForm
@@ -106,7 +114,7 @@ export default function TripDetails() {
 
         <div className="stack">
           <AnalyticsDashboard trip={trip} />
-          <ExpenseMap trip={trip} />
+          <ExpenseMap {...({ trip } as any)} />
           <ChatSection trip={trip} />
           <ItineraryView trip={trip} />
           <CurrencyConverter />
