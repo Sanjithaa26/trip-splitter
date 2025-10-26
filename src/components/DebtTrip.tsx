@@ -3,9 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { type Expense, type Trip, useFirestore } from "../hooks/useFirestore";
 
-/**
- * DebtTrip component - shows debts within a specific trip only.
- */
+
 export default function DebtTrip({ trip }: { trip: Trip }) {
   const { getExpenses, subscribeExpenses } = useFirestore();
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -16,7 +14,7 @@ export default function DebtTrip({ trip }: { trip: Trip }) {
     return subscribeExpenses(trip.id, update);
   }, [trip.id, getExpenses, subscribeExpenses]);
 
-  // Compute balances for this trip only
+  
   const balances = useMemo(() => {
     const map: Record<string, number> = {};
 
@@ -43,7 +41,7 @@ export default function DebtTrip({ trip }: { trip: Trip }) {
     return map;
   }, [expenses, trip.members]);
 
-  // Simplify balances into transfers
+  
   const transfers = useMemo(() => {
     const creditors: { name: string; amount: number }[] = [];
     const debtors: { name: string; amount: number }[] = [];
@@ -77,7 +75,7 @@ export default function DebtTrip({ trip }: { trip: Trip }) {
       <h2>Debt Summary for {trip.name}</h2>
 
       {transfers.length === 0 ? (
-        <p>All settled up! 🎉</p>
+        <p>All settled up!</p>
       ) : (
         <ul className="debt-list">
           {transfers.map((t, idx) => (
