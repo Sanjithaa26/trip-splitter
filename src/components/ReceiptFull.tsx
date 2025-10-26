@@ -209,45 +209,58 @@ export default function ReceiptExpenseForm() {
             <div className="card mt-3">
               <h4>Items / Splits</h4>
               {items.map((item, i) => (
-                <div key={i} className="dish-block">
-                  <div className="grid-3">
-                    <input
-                      className="input"
-                      value={item.name}
-                      onChange={(e) => updateItem(i, "name", e.target.value)}
-                      placeholder="Item name"
-                    />
-                    <input
-                      className="input"
-                      type="number"
-                      value={item.quantity}
-                      onChange={(e) => updateItem(i, "quantity", Number(e.target.value))}
-                      placeholder="Total portions"
-                    />
-                    <input
-                      className="input"
-                      type="number"
-                      value={item.rate}
-                      onChange={(e) => updateItem(i, "rate", Number(e.target.value))}
-                      placeholder="Rate per portion"
-                    />
-                  </div>
+  <div key={i} className="dish-block bg-slate-900 p-4 rounded-xl shadow-md space-y-4 mt-3">
+    {/* Item Fields (Vertical labels) */}
+    <div className="grid grid-cols-3 gap-4">
+      <div className="flex flex-col">
+        <label className="text-sm text-slate-300 mb-1">Item Name</label>
+        <input
+          className="input bg-slate-800 border border-slate-700 rounded-md p-2 text-white"
+          value={item.name}
+          onChange={(e) => updateItem(i, "name", e.target.value)}
+          placeholder="Item name"
+        />
+      </div>
 
-                  <div className="grid-3 mt-1">
-                    {selectedTrip.members.map((m) => (
-                      <label key={m}>
-                        {m} portions
-                        <input
-                          type="number"
-                          className="input"
-                          value={item.memberPortions[m] || 0}
-                          onChange={(e) => updateMemberPortion(i, m, Number(e.target.value))}
-                        />
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              ))}
+      <div className="flex flex-col">
+        <label className="text-sm text-slate-300 mb-1">Quantity</label>
+        <input
+          className="input bg-slate-800 border border-slate-700 rounded-md p-2 text-white"
+          type="number"
+          value={item.quantity}
+          onChange={(e) => updateItem(i, "quantity", Number(e.target.value))}
+          placeholder="Total portions"
+        />
+      </div>
+
+      <div className="flex flex-col">
+        <label className="text-sm text-slate-300 mb-1">Rate</label>
+        <input
+          className="input bg-slate-800 border border-slate-700 rounded-md p-2 text-white"
+          type="number"
+          value={item.rate}
+          onChange={(e) => updateItem(i, "rate", Number(e.target.value))}
+          placeholder="Rate per portion"
+        />
+      </div>
+    </div>
+
+    {/* Member portions below */}
+    <div className="grid grid-cols-5 gap-4">
+      {selectedTrip.members.map((m) => (
+        <div key={m} className="flex flex-col">
+          <label className="text-sm text-slate-300 mb-1">{m}</label>
+          <input
+            type="number"
+            className="input bg-slate-800 border border-slate-700 rounded-md p-2 text-white text-center"
+            value={item.memberPortions[m] || 0}
+            onChange={(e) => updateMemberPortion(i, m, Number(e.target.value))}
+          />
+        </div>
+      ))}
+    </div>
+  </div>
+))}
 
               {/* Compute per-member share */}
               <div className="mt-2">
