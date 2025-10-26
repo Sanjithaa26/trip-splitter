@@ -29,14 +29,14 @@ export default function ExpenseForm({ trip, onCreated, prefillDescription, prefi
 
   const [shares, setShares] = useState<Record<string, number>>({})
 
-  // Add new dish
+  
   const addDish = () => {
     const emptyPortions: Record<string, number> = {}
     for (const m of trip.members) emptyPortions[m] = 0
     setDishes((prev) => [...prev, { name: "", price: 0, portions: 1, memberPortions: emptyPortions }])
   }
 
-  // Handle dish field change
+  
   const updateDish = (index: number, key: keyof Dish, value: any) => {
     setDishes((prev) => {
       const updated = [...prev]
@@ -45,7 +45,7 @@ export default function ExpenseForm({ trip, onCreated, prefillDescription, prefi
     })
   }
 
-  // Handle member portion change
+  
   const updateMemberPortion = (dishIndex: number, member: string, value: number) => {
     setDishes((prev) => {
       const updated = [...prev]
@@ -54,7 +54,7 @@ export default function ExpenseForm({ trip, onCreated, prefillDescription, prefi
     })
   }
 
-  // Compute how much each member owes based on portions
+  
   useEffect(() => {
     const newShares: Record<string, number> = {}
     for (const dish of dishes) {
@@ -136,51 +136,65 @@ export default function ExpenseForm({ trip, onCreated, prefillDescription, prefi
 
       {showDishMode && (
         <div className="card muted">
-          <h4>Dishes</h4>
-          {dishes.map((dish, i) => (
-            <div key={i} className="dish-block">
-              <div className="grid-3">
-                <input
-                  className="input"
-                  placeholder="Dish name"
-                  value={dish.name}
-                  onChange={(e) => updateDish(i, "name", e.target.value)}
-                />
-                <input
-                  className="input"
-                  type="number"
-                  placeholder="Total price"
-                  value={dish.price}
-                  onChange={(e) => updateDish(i, "price", Number(e.target.value))}
-                />
-                <input
-                  className="input"
-                  type="number"
-                  placeholder="Total portions"
-                  value={dish.portions}
-                  onChange={(e) => updateDish(i, "portions", Number(e.target.value))}
-                />
-              </div>
+          <h4>Items</h4>
+         {dishes.map((dish, i) => (
+  <div key={i} className="dish-block bg-slate-900 p-4 rounded-xl shadow-md space-y-4">
+    {/* Top Fields: Dish Name, Price, Portions */}
+    <div className="grid grid-cols-3 gap-4">
+      <div className="flex flex-col">
+        <label className="text-sm text-slate-300 mb-1">Item Name</label>
+        <input
+          className="input bg-slate-800 border border-slate-700 rounded-md p-2 text-white"
+          placeholder="Item name"
+          value={dish.name}
+          onChange={(e) => updateDish(i, "name", e.target.value)}
+        />
+      </div>
 
-              <div className="grid-3 mt-1">
-                {trip.members.map((m) => (
-                  <label key={m} className="form-label">
-                    {m}
-                    <input
-                      className="input"
-                      type="number"
-                      step="1"
-                      value={dish.memberPortions[m] ?? 0}
-                      onChange={(e) => updateMemberPortion(i, m, Number(e.target.value))}
-                    />
-                  </label>
-                ))}
-              </div>
-            </div>
-          ))}
+      <div className="flex flex-col">
+        <label className="text-sm text-slate-300 mb-1">Total Price</label>
+        <input
+          className="input bg-slate-800 border border-slate-700 rounded-md p-2 text-white"
+          type="number"
+          placeholder="Total price"
+          value={dish.price}
+          onChange={(e) => updateDish(i, "price", Number(e.target.value))}
+        />
+      </div>
+
+      <div className="flex flex-col">
+        <label className="text-sm text-slate-300 mb-1">Total Portions</label>
+        <input
+          className="input bg-slate-800 border border-slate-700 rounded-md p-2 text-white"
+          type="number"
+          placeholder="Total portions"
+          value={dish.portions}
+          onChange={(e) => updateDish(i, "portions", Number(e.target.value))}
+        />
+      </div>
+    </div>
+
+    {/* Member Portion Inputs */}
+    <div className="grid grid-cols-5 gap-4">
+      {trip.members.map((m) => (
+        <div key={m} className="flex flex-col">
+          <label className="text-sm text-slate-300 mb-1">{m}</label>
+          <input
+            className="input bg-slate-800 border border-slate-700 rounded-md p-2 text-white text-center"
+            type="number"
+            step="1"
+            value={dish.memberPortions[m] ?? 0}
+            onChange={(e) => updateMemberPortion(i, m, Number(e.target.value))}
+          />
+        </div>
+      ))}
+    </div>
+  </div>
+))}
+
 
           <button type="button" className="btn" onClick={addDish}>
-            + Add Dish
+            + Add Item
           </button>
         </div>
       )}
