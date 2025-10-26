@@ -1,4 +1,4 @@
-/* Design tokens: keep to 3-5 core colors */
+
 :root {
   --bg: #0b1020; /* neutral dark */
   --surface: #121934; /* neutral surface */
@@ -26,7 +26,7 @@ body {
   color: var(--text);
 }
 
-/* Layout */
+
 .container {
   width: 100%;
   max-width: 1100px;
@@ -95,7 +95,7 @@ body {
   opacity: 0.8;
 }
 
-/* Reusables */
+
 .card {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.02));
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -147,6 +147,8 @@ textarea.input {
   width: 100%;
   padding: 10px 12px;
   border-radius: 10px;
+  margin-bottom: 12px;
+  gap: 12px;
   border: 3px solid #0b1020;
   background: rgba(255, 255, 255, 0.03);
   color: var(--text);
@@ -158,12 +160,20 @@ textarea.input {
 }
 select.input option {
   background: #ffff; 
-  color: #0b1020; /* light text */
+  color: #0b1020; 
   padding: 8px 12px;
   border: 1px solid #0b1020;
 }
 
-
+input[type="file"].input::file-selector-button {
+  margin-right: 12px;
+  background: linear-gradient(90deg, #00c6ff, #0072ff);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  cursor: pointer;
+}
 select.input option:hover {
   background: rgba(26, 188, 156, 0.2); /* light teal highlight */
   color: #0b1020; 
