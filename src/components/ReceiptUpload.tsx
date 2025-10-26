@@ -129,6 +129,7 @@ export default function ReceiptUpload({ onExtracted }: Props) {
       <input
         className="input"
         type="file"
+        style={{ marginRight: "12px" }}
         accept="image/*"
         onChange={(e) => handleFile(e.target.files?.[0] || null)}
       />
