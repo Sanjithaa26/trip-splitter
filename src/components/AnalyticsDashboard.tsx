@@ -40,13 +40,19 @@ export default function AnalyticsDashboard({ trip }: Props) {
           <div style={{ height: 300 }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="category" />
-                <YAxis />
-                <Tooltip formatter={(value: number) => `${value} ${trip.currency}`} />
-                <Legend />
-                <Bar dataKey="amount" name={`Amount (${trip.currency})`} fill="var(--accent)" />
-              </BarChart>
+  <CartesianGrid strokeDasharray="3 3" />
+  <XAxis dataKey="category" />
+  <YAxis />
+  <Tooltip
+    formatter={(value: number) => `${value} ${trip.currency}`}
+    contentStyle={{ backgroundColor: 'white', borderColor: 'black' }}
+    labelStyle={{ color: '#222' }}
+  />
+  <Legend />
+  <Bar dataKey="amount" name={`Amount (${trip.currency})`} fill="var(--accent)" />
+</BarChart>
+
+
             </ResponsiveContainer>
           </div>
         </>
